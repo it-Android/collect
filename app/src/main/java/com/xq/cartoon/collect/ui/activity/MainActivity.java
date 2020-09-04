@@ -7,6 +7,7 @@ import android.widget.RadioButton;
 import android.widget.RadioGroup;
 
 import androidx.databinding.DataBindingUtil;
+import androidx.lifecycle.ViewModelProvider;
 
 import com.xq.cartoon.collect.R;
 import com.xq.cartoon.collect.ui.activity.base.BaseActivity;
@@ -19,36 +20,48 @@ import com.xq.cartoon.collect.ui.fragment.entity.MainRadioButtonData;
  */
 public class MainActivity extends BaseActivity implements RadioGroup.OnCheckedChangeListener {
     private ActivityMainBinding binding;
-    private MainFragmentAdapter fragmentAdapter;
+    private MainActivityViewModel viewModel;
     private static MainRadioButtonData[] datas = {
             new MainRadioButtonData("首页", 0, 0),
             new MainRadioButtonData("书架", 0, 2),
             new MainRadioButtonData("我的", 0, 3)
     };
-    private int checkNum = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         //setContentView(R.layout.activity_main);
         binding = DataBindingUtil.setContentView(this, R.layout.activity_main);
-        fragmentAdapter = new MainFragmentAdapter(datas, getSupportFragmentManager());
-        initBottomNavigationHolder(binding.bottomNavigationHolder);
+        viewModel = new ViewModelProvider(this,
+                new ViewModelProvider.AndroidViewModelFactory(getApplication())).get(MainActivityViewModel.class);
+        if (viewModel.getFragmentAdapter().getValue() == null) {
+            viewModel.getFragmentAdapter().setValue(new MainFragmentAdapter(datas, getSupportFragmentManager()));
+        }
+        viewModel.getFragmentAdapter().observe(this, mainFragmentAdapter -> {
+            Integer value = viewModel.getCheckIndex().getValue();
+            mainFragmentAdapter.showFragment(value);
+            initBottomNavigationHolder(binding.bottomNavigationHolder, value);
+        });
+        viewModel.getCheckIndex().observe(this, checkIndex -> {
+            MainFragmentAdapter adapter = viewModel.getFragmentAdapter().getValue();
+            if (adapter != null) {
+                adapter.showFragment(checkIndex);
+            }
+        });
     }
 
     @Override
     public void onCheckedChanged(RadioGroup group, int checkedId) {
         for (MainRadioButtonData data : datas) {
             if (data.id == checkedId) {
-                this.checkNum = checkedId;
-                fragmentAdapter.showFragment(this.checkNum);
+                viewModel.setCheckIndex(checkedId);
                 return;
             }
         }
     }
 
     //底部导航栏
-    private void initBottomNavigationHolder(RadioGroup radioGroup) {
+    private void initBottomNavigationHolder(RadioGroup radioGroup, int checkNum) {
         for (int i = 0; i < datas.length; i++) {
             MainRadioButtonData data = datas[i];
             data.id = i;
@@ -57,7 +70,7 @@ public class MainActivity extends BaseActivity implements RadioGroup.OnCheckedCh
         radioGroup.setOnCheckedChangeListener(this::onCheckedChanged);
         int length = datas.length;
         if (length > 0 && checkNum < length) {
-            ((RadioButton) radioGroup.getChildAt(this.checkNum)).setChecked(true);
+            ((RadioButton) radioGroup.getChildAt(checkNum)).setChecked(true);
         }
     }
 

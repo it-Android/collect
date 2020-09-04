@@ -2,10 +2,15 @@ package com.xq.cartoon.collect.ui.fragment;
 
 import android.app.Application;
 import android.content.Context;
+import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.MutableLiveData;
+
+import com.xq.cartoon.collect.ui.fragment.entity.HomeItemData;
+
+import java.util.List;
 
 /**
  * @作者(author)： JQ
@@ -13,6 +18,7 @@ import androidx.lifecycle.MutableLiveData;
  **/
 public class HomeFragmentViewModel extends AndroidViewModel {
     private MutableLiveData<Integer> checkIndex;
+    private MutableLiveData<List<HomeItemData>> itemData;
     private Context mContext;
 
     public HomeFragmentViewModel(@NonNull Application application) {
@@ -33,4 +39,19 @@ public class HomeFragmentViewModel extends AndroidViewModel {
     public void setCheckIndex(Integer checkIndex) {
         getCheckIndex().setValue(checkIndex);
     }
+
+    public MutableLiveData<List<HomeItemData>> getItemData() {
+        synchronized (this) {
+            if (itemData == null) {
+                itemData = new MutableLiveData<>();
+                //itemData.setValue(new ArrayList<>());
+            }
+        }
+        return itemData;
+    }
+
+    public void setItemData(List<HomeItemData> list) {
+        getItemData().setValue(list);
+    }
+
 }

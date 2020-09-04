@@ -10,14 +10,14 @@ import android.view.WindowManager;
  * @作者(author)： JQ
  * @创建时间(date)： 2020/8/22 19:15
  **/
-public class SysUtils {
+public class AppConfig {
     private Context context;
 
     private static class SingletonHolder {
-        private static SysUtils INSTANCE = new SysUtils();
+        private static AppConfig INSTANCE = new AppConfig();
     }
 
-    public static SysUtils getInstance() {
+    public static AppConfig getInstance() {
         return SingletonHolder.INSTANCE;
     }
 
